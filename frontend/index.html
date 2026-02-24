@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>SmartGear Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h2>SmartGear - Dashboard</h2>
+  <nav>
+    <a href="index.html">Dashboard</a>
+    <a href="digital-twin.html">Digital Twin</a>
+    <a href="alerts.html">Alerts</a>
+    <a href="about.html">About</a>
+  </nav>
+</header>
+
+<div class="container">
+  <div class="grid" id="dashboard"></div>
+</div>
+
+<script src="data.js"></script>
+<script>
+  function updateDashboard() {
+    const dashboard = document.getElementById("dashboard");
+    dashboard.innerHTML = "";
+
+    for (let i = 1; i <= 3; i++) {
+      const d = generateWorkerData(i);
+      dashboard.innerHTML += `
+        <div class="card">
+          <h3>Worker ${d.workerId}</h3>
+          <div class="status ${d.risk.toLowerCase()}">${d.risk}</div>
+          <p>Heart Rate: ${d.heartRate} bpm</p>
+          <p>Temp: ${d.bodyTemp} °C</p>
+          <p>Gas: ${d.gas} ppm</p>
+          <p>Motion: ${d.motion}</p>
+          <div class="footer">Fog-layer processed</div>
+        </div>
+      `;
+    }
+  }
+
+  updateDashboard();
+  setInterval(updateDashboard, 2000);
+</script>
+
+</body>
+</html>
