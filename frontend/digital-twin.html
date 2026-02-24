@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Digital Twin - SmartGear</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h2>Worker Digital Twin</h2>
+  <nav>
+    <a href="index.html">Dashboard</a>
+    <a href="digital-twin.html">Digital Twin</a>
+    <a href="alerts.html">Alerts</a>
+    <a href="about.html">About</a>
+  </nav>
+</header>
+
+<div class="container">
+
+  <label>Select Worker:</label>
+  <select id="workerSelect" onchange="changeWorker()">
+    <option value="1">Worker 1</option>
+    <option value="2">Worker 2</option>
+    <option value="3">Worker 3</option>
+  </select>
+
+  <div id="twin" style="margin-top:20px;"></div>
+
+  <canvas id="heartRateGraph" width="750" height="260"></canvas>
+  <canvas id="gasGraph" width="750" height="260"></canvas>
+
+</div>
+
+<script src="data.js"></script>
+<script>
+  let CURRENT_WORKER = 1;
+
+  function changeWorker() {
+    CURRENT_WORKER = document.getElementById("workerSelect").value;
+  }
+
+  function drawGraph(canvasId, history, key, label, min, max, color) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext("2d");
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    const padding = 50;
+    const width = canvas.width - padding * 2;
+    const height = canvas.height - padding * 2;
+
+    // Axes
+    ctx.strokeStyle = "#94a3b8";
+    ctx.beginPath();
+    ctx.moveTo(padding, padding);
+    ctx.lineTo(padding, canvas.height - padding);
+    ctx.lineTo(canvas.width - padding, canvas.height - padding);
+    ctx.stroke();
+
+    // Y-axis labels
+    ctx.fillStyle = "#e5e7eb";
+    for (let i = 0; i <= 5; i++) {
+      const yVal = min + ((max - min) / 5) * i;
+      const y = canvas.height - padding - (height / 5) * i;
+      ctx.fillText(yVal.toFixed(0), 10, y + 5);
+      ctx.beginPath();
+      ctx.moveTo(padding - 5, y);
+      ctx.lineTo(padding, y);
+      ctx.stroke();
+    }
+
+    // Plot line
+    ctx.beginPath();
+    history.forEach((p, i) => {
+      const x = padding + (i / (history.length - 1 || 1)) * width;
+      const y = canvas.height - padding - ((p[key] - min) / (max - min)) * height;
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    });
+
+    ctx.strokeStyle = color;
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    ctx.fillText(label, padding, padding - 15);
+  }
+
+  function updateUI() {
+    const twin = updateDigitalTwin(CURRENT_WORKER);
+
+    document.getElementById("twin").innerHTML = `
+      <div class="card">
+        <h3>Worker ${CURRENT_WORKER} - Digital Twin</h3>
+        <div class="status ${twin.current.risk.toLowerCase()}">${twin.current.risk}</div>
+        <p>Heart Rate: ${twin.current.heartRate} bpm</p>
+        <p>Gas Level: ${twin.current.gas} ppm</p>
+        <p>Body Temperature: ${twin.current.bodyTemp} °C</p>
+        <p>Ambient Temperature: ${twin.current.ambientTemp} °C</p>
+        <p>Humidity: ${twin.current.humidity} %</p>
+        <p>Motion: ${twin.current.motion}</p>
+        <div class="footer">Fog-layer digital twin with historical data</div>
+      </div>
+    `;
+
+    drawGraph("heartRateGraph", twin.history, "heartRate", "Heart Rate (bpm)", 60, 140, "#22d3ee");
+    drawGraph("gasGraph", twin.history, "gas", "Gas Level (ppm)", 100, 500, "#ef4444");
+  }
+
+  updateUI();
+  setInterval(updateUI, 2000);
+</script>
+
+</body>
+</html>

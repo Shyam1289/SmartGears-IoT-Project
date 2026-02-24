@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Alerts - SmartGear</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+  <h2>Safety Alerts</h2>
+  <nav>
+    <a href="index.html">Dashboard</a>
+    <a href="digital-twin.html">Digital Twin</a>
+    <a href="alerts.html">Alerts</a>
+    <a href="about.html">About</a>
+  </nav>
+</header>
+
+<div class="container">
+  <div id="alertList"></div>
+</div>
+
+<script src="data.js"></script>
+<script>
+  function addAlert() {
+    const data = generateWorkerData(Math.ceil(Math.random() * 3));
+    if (data.risk !== "Critical") return;
+
+    const alertBox = document.getElementById("alertList");
+
+    const alert = document.createElement("div");
+    alert.className = "card";
+    alert.innerHTML = `
+      <div class="status critical">CRITICAL</div>
+      <p>Worker ${data.workerId}</p>
+      <p>Gas Level: ${data.gas} ppm</p>
+      <p>Heart Rate: ${data.heartRate} bpm</p>
+      <p>Motion: ${data.motion}</p>
+      <div class="footer">Time: ${new Date().toLocaleTimeString()}</div>
+    `;
+
+    alertBox.prepend(alert);
+  }
+
+  setInterval(addAlert, 3000);
+</script>
+
+</body>
+</html>
